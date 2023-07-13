@@ -58,39 +58,36 @@ def login():
 def register():
     login_form = LoginForm(request.form)
     create_account_form = CreateAccountForm(request.form)
-    if 'register' in request.form:
+    if 'register' not in request.form:
+        return render_template('accounts/register.html', form=create_account_form)
+    username = request.form['username']
+    email = request.form['email']
 
-        username = request.form['username']
-        email = request.form['email']
-
-        # Check usename exists
-        user = User.query.filter_by(username=username).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Username already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # Check email exists
-        user = User.query.filter_by(email=email).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Email already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # else we can create the user
-        user = User(**request.form)
-        db.session.add(user)
-        db.session.commit()
-
+    # Check usename exists
+    user = User.query.filter_by(username=username).first()
+    if user:
         return render_template('accounts/register.html',
-                               msg='User created please <a href="/login">login</a>',
-                               success=True,
+                               msg='Username already registered',
+                               success=False,
                                form=create_account_form)
 
-    else:
-        return render_template('accounts/register.html', form=create_account_form)
+    # Check email exists
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return render_template('accounts/register.html',
+                               msg='Email already registered',
+                               success=False,
+                               form=create_account_form)
+
+    # else we can create the user
+    user = User(**request.form)
+    db.session.add(user)
+    db.session.commit()
+
+    return render_template('accounts/register.html',
+                           msg='User created please <a href="/login">login</a>',
+                           success=True,
+                           form=create_account_form)
 
 
 @blueprint.route('/logout')
